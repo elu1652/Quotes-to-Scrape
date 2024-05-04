@@ -1,17 +1,13 @@
+import openpyxl
 import requests
 import pandas
 from bs4 import BeautifulSoup
-import pygsheets
 import pandas as pd
 
-
-gc = pygsheets.authorize(service_file='credentials.json')
-df = pd.DataFrame()
-df['Quotes'] = ['a']
-sh = gc.open('Quotes to Scrape')
-wks = sh[0]
-wks.set_dataframe(df,(1,1))
-
+#Open excel
+FILE = 'test.xlsx'
+wb = openpyxl.load_workbook(FILE)
+ws = wb.active
 
 #Connect to website
 url = 'https://quotes.toscrape.com/'
@@ -73,5 +69,11 @@ def generate_list(div_tag):
                      'Tags':tags[i],'Biography link':links[i]},)
     return dict
 
-print(generate_list(div_tags))
 
+dict = generate_list(div_tags)
+headers = [ws.cell(row=1,column=i).value for i in range(1,5)]
+for i in range(len(dict)):
+    d = dict[i]
+    for index,item in enumerate(headers,1):
+        ws.cell(row=i+1,column = index,value = d[item])
+wb.save('test.xlsx')
